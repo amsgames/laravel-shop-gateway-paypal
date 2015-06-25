@@ -1,0 +1,31 @@
+{
+    "name": "amsgames/laravel-shop-gateway-paypal",
+    "description": "PayPal gateway for Laravel Shop package.",
+    "license": "MIT",
+    "keywords": ["laravel shop","gateway","laravel-shop","paypal"],
+    "authors": [
+        {
+            "name": "Amsgames, LLC",
+            "email": "support@amsgames.com"
+        },
+        {
+            "name": "Alejandro Mostajo",
+            "email": "amostajo@gmail.com"
+        }
+    ],
+    "require": {
+        "php": ">=5.4.0",
+        "illuminate/console": "~5.0",
+        "illuminate/support": "~5.0",
+        "paypal/rest-api-sdk-php": "*"
+    },
+    "require-dev": {
+        "sami/sami": "dev-master"
+    },
+    "autoload": {
+        "psr-4": {
+            "Amsgames\\LaravelShopGatewayPaypal\\": "src"
+        }
+    },
+    "minimum-stability": "dev"
+}
