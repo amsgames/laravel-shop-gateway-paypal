@@ -25,7 +25,7 @@ This package comes with:
 In order to install Laravel Shop, you can run
 
 ```json
-"composer require amsgames/laravel-shop-gateway-paypal": "dev-master"
+"amsgames/laravel-shop-gateway-paypal": "dev-master"
 ```
 
 to your composer.json. Then run `composer install` or `composer update`.
@@ -43,7 +43,7 @@ in the `gateways` array.
 
 ### Authentication
 
-Set you PayPal app authentication settings in `config/services.php`, like:
+Set your PayPal app authentication settings in `config/services.php`, like:
 
 ```php
     'paypal' => [
