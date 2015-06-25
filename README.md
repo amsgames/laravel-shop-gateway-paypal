@@ -7,8 +7,9 @@ PayPal Gateway solution for [Laravel Shop](https://github.com/amsgames/laravel-s
 
 This package comes with:
 
-* PayPal Direct Credit Card payment gateway
-* PayPal Express payment gateway
+* Direct Credit Card payments
+
+* PayPal Express payments
 
 ## Contents
 
@@ -18,7 +19,10 @@ This package comes with:
 - [Gateway Usage](#gateway-usage)
     - [Direct Credit Card](#direct-credit-card)
     - [PayPal Express](#paypal-express)
+        - [Configuration](#configuration-1)
+        - [Usage](#usage)
 - [License](#license)
+- [Additional Information](#aditional-information)
 
 ## Installation
 
@@ -43,11 +47,10 @@ in the `gateways` array.
 
 ### Authentication
 
-Set your PayPal app authentication settings in `config/services.php`, like:
+Set your PayPal app authentication credentials in `config/services.php`, like:
 
 ```php
     'paypal' => [
-        'account' => env('PAYPAL_ACCOUNT', 'account@domain.com'),
         'client_id' => env('PAYPAL_CLIENT_ID', ''),
         'secret' => env('PAYPAL_SECRET', ''),
         'sandbox' => env('PAYPAL_SANDBOX', true),
@@ -93,8 +96,65 @@ if ($order->hasFailed) {
 }
 ```
 
-**NOTE:** If you are calling `Shop::checkout()` in a different controller or view than `Shop::placeOrder`, be sure to recall `setCreditCard()` before calling `Shop::placeOrder()` in the second controller.
+**NOTE:** If you are calling `Shop::checkout()` in a different controller or view than `Shop::placeOrder`, be sure to recall `setCreditCard()` before calling `Shop::placeOrder()` in your second controller. This package does not stores credit card data.
+
+**RECOMMENDATION:** Use SSL to secure you checkout flow when dealing with credit cards.
+
+### PayPal Express
+
+If you don't want to deal with credit card forms and SSL, you can us PayPal Express instead. PayPal Express handles the payment process outside your website and returns with the results.
+
+Look at [PayPal's documentation](https://developer.paypal.com/docs/classic/express-checkout/integration-guide/ECGettingStarted/) for more information about this process.
+
+#### Configuration
+
+PayPal will callback Laravel Shop and this gateway with the results. Laravel Shop will then redirect the customer to the route name set in `config/shop.php` and will pass by as parameter the `Order Id`. Set up this route before using this gateway.
+
+```php
+    /*
+    |--------------------------------------------------------------------------
+    | Redirect route after callback
+    |--------------------------------------------------------------------------
+    |
+    | Which route to call after the callback has been processed.
+    |
+    */
+    'callback_redirect_route' => 'home',
+```
+
+#### Usage
+
+```php
+// (1) - Set gateway
+Shop::setGateway('paypalExpress');
+
+// (2) - Call checkout / OPTIONAL
+// You can call this to keep a standard flow
+// Although this step for this gateway is not needed.
+Shop::checkout();
+
+// (3) - Create order
+$order = Shop::placeOrder();
+
+// (4) - Review order and redirect to payment
+if ($order->isPending) {
+
+  // PayPal URL to redirect to proceed with payment
+  $approvalUrl = Shop::gateway()->getApprovalUrl();
+
+  // Redirect to url
+  return redirect($approvalUrl);
+}
+
+// (5) - Callback
+// You don't have to do anything.
+// Laravel Shop will handle the callback and redirect the customer to the configured route.
+```
 
 ## License
 
 This package is free software distributed under the terms of the MIT license.
+
+## Additional Information
+
+This package uses the official [PayPal PHP SDK](https://github.com/paypal/PayPal-PHP-SDK).
