@@ -197,10 +197,87 @@ class PayPalTest extends TestCase
 
 		$this->assertTrue($order->hasFailed);
 
-		$this->assertEquals(Shop::exception()->getMessage(), 'INTERNAL_SERVICE_ERROR: Paypal payment Failed.');
+		$this->assertEquals(Shop::exception()->getMessage(), 'CREDIT_CARD_REFUSED: Credit card was refused');
 
 		$user->delete();
 
 		$product->delete();
+	}
+	
+	/**
+	 * Tests completed orders based on total amount equals to 0.
+	 */
+	public function testOrderTotalZero()
+	{
+		$user = factory('App\User')->create(['password' => Hash::make('laravel-shop')]);
+
+		Auth::attempt(['email' => $user->email, 'password' => 'laravel-shop']);
+
+	    $cart = App\Cart::current();
+
+		$cart->add([
+			'sku'	=> 'ZERO0000',
+			'price'	=> 0.0,
+		]);
+
+		Shop::setGateway('paypal');
+
+		Shop::gateway()->setCreditCard(
+			Config::get('testing.paypal.creditcard.type'),
+			Config::get('testing.paypal.creditcard.number'),
+			Config::get('testing.paypal.creditcard.month'),
+			Config::get('testing.paypal.creditcard.year'),
+			Config::get('testing.paypal.creditcard.cvv'),
+			Config::get('testing.paypal.creditcard.firstname'),
+			Config::get('testing.paypal.creditcard.lastname')
+		);
+
+		$this->assertTrue(Shop::checkout());
+
+		$order = Shop::placeOrder();
+
+		$this->assertTrue($order->isCompleted);
+
+		$user->delete();
+	}
+	
+	/**
+	 * Tests completed orders based on total amount equals to 0.
+	 */
+	public function testVariedOrderTotal()
+	{
+		$user = factory('App\User')->create(['password' => Hash::make('laravel-shop')]);
+
+		Auth::attempt(['email' => $user->email, 'password' => 'laravel-shop']);
+
+	    $cart = App\Cart::current();
+
+		$cart->add([
+			'sku'	=> 'ZERO0000',
+			'price'	=> 0.0,
+		])->add([
+			'sku'	=> 'TEN00010',
+			'price'	=> 10.0,
+		]);
+
+		Shop::setGateway('paypal');
+
+		Shop::gateway()->setCreditCard(
+			Config::get('testing.paypal.creditcard.type'),
+			Config::get('testing.paypal.creditcard.number'),
+			Config::get('testing.paypal.creditcard.month'),
+			Config::get('testing.paypal.creditcard.year'),
+			Config::get('testing.paypal.creditcard.cvv'),
+			Config::get('testing.paypal.creditcard.firstname'),
+			Config::get('testing.paypal.creditcard.lastname')
+		);
+
+		$this->assertTrue(Shop::checkout());
+
+		$order = Shop::placeOrder();
+
+		$this->assertTrue($order->isCompleted);
+
+		$user->delete();
 	}
 }

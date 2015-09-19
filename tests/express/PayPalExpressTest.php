@@ -92,4 +92,25 @@ class PayPalExpressTest extends TestCase
 
 		$this->assertNotEmpty($approvalUrl);
 	}
+	
+	/**
+	 * Tests completed orders based on total amount equals to 0.
+	 */
+	public function testOrderTotalZero()
+	{
+		Shop::setGateway('paypalExpress');
+
+		$this->cart->clear();
+
+		$this->cart->add([
+			'sku'	=> 'ZERO0000',
+			'price'	=> 0.0,
+		]);
+
+		$this->assertTrue(Shop::checkout());
+
+		$order = Shop::placeOrder();
+
+		$this->assertTrue($order->isCompleted);
+	}
 }

@@ -80,6 +80,15 @@ class GatewayPayPal extends PaymentGateway
 
         try {
 
+            if ($order->total <= 0) {
+
+                $this->detail = 'Order total is 0; no PayPal transaction required.';
+
+                $this->transactionId = uniqid();
+
+                return true;
+            }
+
             $this->setContext();
 
             $instrument = new FundingInstrument();
@@ -220,16 +229,19 @@ class GatewayPayPal extends PaymentGateway
 
         foreach ($order->items as $shopItem) {
 
-            $item = new Item();
+            if ($shopItem->price > 0) {
 
-            $item->setName(substr($shopItem->displayName, 0, 127))
-                ->setDescription($shopItem->sku)
-                ->setCurrency($shopItem->currency)
-                ->setQuantity($shopItem->quantity)
-                ->setTax($shopItem->tax)
-                ->setPrice($shopItem->price);
+                $item = new Item();
 
-            $items[] = $item;
+                $item->setName(substr($shopItem->displayName, 0, 127))
+                    ->setDescription($shopItem->sku)
+                    ->setCurrency($shopItem->currency)
+                    ->setQuantity($shopItem->quantity)
+                    ->setTax($shopItem->tax)
+                    ->setPrice($shopItem->price);
+
+                $items[] = $item;
+            }
         }
 
         return $items;
